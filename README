@@ -1,0 +1,2 @@
+Twitter bot to report extreme weather conditions in the Greek region.
+Data collected from openweathermap.org and processed with pyowm library.
