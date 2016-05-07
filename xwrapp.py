@@ -21,14 +21,15 @@ from pyowm import OWM
 from datetime import datetime
 import tweepy
 import time
+import os
 
-API_key = ''
+API_key = os.environ.get('OWM_API_KEY')
 owm = OWM(API_key)
 
-consumer_key = "" 
-consumer_secret = ""
-access_token = "" 
-access_token_secret = ""
+consumer_key = os.environ.get('TWEEPY_CONSUMER_KEY')
+consumer_secret = os.environ.get('TWEEPY_CONSUMER_SECRET')
+access_token = os.environ.get('TWEEPY_TOKEN')
+access_token_secret = os.environ.get('TWEEPY_TOKEN_SECRET')
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
@@ -39,6 +40,49 @@ HAZARD_CODES = [202, 212, 221, 231, 232, 302, 312, 314, 321, 503, 504, 511, \
 	522, 531, 602, 622, 960, 961, 962, 762, 771, 781, \
 	900,901, 902, 903, 904, 905, 906]
 
+D = {"NWN":348.75, "NW":325.25, "WNW": 303.75, "W":281.25, "WSW":258.75,\
+	 "SW":236.25, "SSW":213.75, "S":191.25, "SSE":168.75, "SE":146.25,\
+	"ESE":123.75, "E":101.25, "ENE":78.75, "NE":56.25, "NNE":33.75}
+
+def deg_to_direction(degrees):
+	if degrees >= 348.75 or degrees < 11.25:
+		return "N"
+	elif degrees >= 11.25  and degrees < 33.75:	
+		return "NNE"
+	elif degrees >= 33.75 and degrees < 56.25:
+		return "NE"	
+	elif degrees >= 56.25 and degrees < 78.75:
+		return "ENE"	
+	elif degrees >= 78.75 and degrees < 101.25:
+		return "E"
+	elif degrees >= 101.25 and degrees < 123.75:
+		return "ESE"
+	elif degrees >= 123.75 and degrees < 146.25:
+		return "SE"
+	elif degrees >= 146.25 and degrees < 168.75:
+		return "SSE"
+	elif degrees >= 168.75 and degrees < 191.25:
+		return "S"
+	elif degrees >= 191.25 and degrees < 213.75:
+		return "SSW"
+	elif degrees >= 213.75 and degrees < 236.25:
+		return "SW"
+	elif degrees >= 236.25 and degrees < 258.75:
+		return "WSW"
+	elif degrees >= 258.75 and degrees < 281.25:
+		return "W"
+	elif degrees >= 281.25 and degrees < 303.75:
+		return "WNW"
+	elif degrees >= 303.75 and degrees < 326.25:
+		return "NW"
+	elif degrees >= 326.25 and degrees < 348.75:
+		return "NNW"
+	else:
+		return ""
+
+def mps_to_kmph(mps):
+	return (mps * 3600)/1000		
+
 def main():
 	with open('greek_cities.owm') as f:
 		content = f.read().splitlines()
@@ -48,7 +92,8 @@ def main():
 	min_temp = 100
 	max_loc = ''
 	min_loc = ''
-
+	print deg_to_direction(44)
+	print mps_to_kmph(77)
 	for city in content:
 		counter += 1
 		if counter%50 == 0:
@@ -73,14 +118,15 @@ def main():
 				temperature = w.get_temperature(unit='celsius')['temp']
 				status = w.get_detailed_status()
 				temperature = w.get_temperature(unit='celsius')['temp']
-				wind = w.get_wind()['speed']
+				wind = mps_to_kmph(w.get_wind()['speed'])
+				wind_dir = deg_to_direction(w.get_wind()['deg'])
 				humidity = w.get_humidity()
 				pressure = w.get_pressure()['press']
 				hazard = True
 				tweet = "Hazardous Weather in #" + location_name + '\n' + \
 					status.upper() + '\n' + \
 					"Temp: " + str(int(temperature)) + u"\u2103" + '\n' \
-					"Wind: " + str(wind) + " m/s" + '\n' + \
+					"Wind: " + str(wind) + " km/h" + " " + wind_dir + '\n' + \
 					"Humidity: " + str(humidity) + " %" + '\n' + \
 					"Time: " + datetime.now().strftime("%H:%M:%S")
 				api.update_status(tweet)
