@@ -106,7 +106,7 @@ def main():
 		with open('greek_cities.owm') as f:
 			content = f.read().splitlines()
 	else:
-		content = options.city
+		content = options.city_id
 	counter = 0
 	hazard = False
 	max_temp = -273
