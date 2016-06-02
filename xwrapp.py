@@ -92,13 +92,13 @@ def main():
 	    action="store", dest="city",
 	    help="city string", default="all")
 
-	parser.add_option('-id', '--cityid',
+	parser.add_option('-i', '--cityid',
 	    action="store", dest="city_id",
 	    help="city id string", default="0")
 
 	parser.add_option('-r', '--reply',
-	    action="store", dest="reply",
-	    help="reply to tweets?", default=false)
+	    action="store_true", dest="reply",
+	    help="reply to tweets?")
 
 	options, args = parser.parse_args()
 
